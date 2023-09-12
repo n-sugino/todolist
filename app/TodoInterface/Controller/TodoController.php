@@ -1,116 +1,107 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\TodoInterface\Controller;
+
+use App\Domain\Shared\Model\CriteriaField;
+use App\Domain\Shared\Model\CriteriaSort;
+use App\Domain\Shared\Model\CriteriaSortDirection;
+use App\Domain\Shared\ValueObject\DateTimeValueObject;
+
+use App\Domain\Todo\Aggregate\Todo;
+use App\Domain\Todo\TodoRepository;
+use App\Domain\Todo\TodoSearchCriteria;
+use App\Domain\Todo\ValueObject\Id;
+use App\Domain\Todo\ValueObject\Title;
+use App\Domain\Todo\ValueObject\Content;
+use App\Domain\Todo\ValueObject\Due;
+
+use App\Infrastructure\Laravel\Controller;
 
 use Illuminate\Http\Request;
-use App\Models\Todo;
-use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 
 class TodoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function __invoke()
+    public function index(Request $request, TodoRepository $todoRepository): JsonResponse
     {
-        $todos = Todo::orderBy('created_at', 'desc')->get();
+        $offset = $request->query('offset');
+        $email = $request->query('email');
+        $name = $request->query('name');
 
-        return view('index')->with('todos', $todos);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        return view('create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $this->validate($request,
-            [
-                'title' => 'required',
-                'content' => 'required',
-                'due' => 'required'
-            ]
-            
+        $criteria = TodoSearchCriteria::create(
+            !empty($offset) && !is_array($offset) ? (int) $offset : null,
+            !empty($email) && !is_array($email) ? $email : null,
+            !empty($name) && !is_array($name) ? $name : null,
         );
 
-        $todo = new Todo();
-        $todo->title = $request->input('title');
-        $todo->content = $request->input('content');
-        $todo->due = $request->input('due');
-        $todo->save();
+        $criteria->sortBy(new CriteriaSort(CriteriaField::fromString('name'), CriteriaSortDirection::ASC));
 
-        return redirect('/')->with('success', 'Todo created successfuly!');
+        $todos = $todoRepository->searchByCriteria($criteria);
+        
+        return response()->json([
+            'todos' => array_map(fn (Todo $todo) => $todo->asArray(), $todos)
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function store(TodoRepository $todoRepository): JsonResponse
     {
-        $todo = Todo::find($id);
+        $todos = [];
 
-        return view('show')->with('todo', $todo);
+        for ($i = 1; $i <= 3; $i++) {
+            $todo = Todo::create(
+                Id::random(),
+                Email::fromString(sprintf('email_%d', $i)),
+                Name::fromString(sprintf('name_%d', $i)),
+                DateTimeValueObject::now()
+            );
+
+            $todoRepository->create($todo);
+
+            $todos[] = $todo->asArray();
+        }
+
+        return response()->json([
+            'todos' => $todos
+        ], JsonResponse::HTTP_CREATED);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
+    public function show(TodoRepository $todoRepository, string $id): JsonResponse
     {
-        $todo = Todo::find($id);
+        $todo = $todoRepository->findById(Id::fromPrimitives($id));
 
-        return view('edit')->with('todo', $todo);
+        return response()->json([
+            'todo' => $todo->asArray()
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, TodoRepository $todoRepository, string $id): JsonResponse
     {
-        $todo = Todo::find($id);
-        $todo->title = $request->input('title');
-        $todo->content = $request->input('content');
-        $todo->due = $request->input('due');
-        $todo->save();
+        $todo = $todoRepository->findById(Id::fromPrimitives($id));
 
-        return redirect('/')->with('success', 'Todo edited successfuly!');
+        $providedEmail = $request->input('email');
+        $providedName = $request->input('name');
+
+        if (!empty($providedEmail)) {
+            $todo->updateEmail($providedEmail);
+        }
+
+        if (!empty($providedName)) {
+            $todo->updateName($providedName);
+        }
+
+        $todoRepository->update($todo);
+
+        return response()->json([
+            'todo' => $todo->asArray()
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function destroy(TodoRepository $todoRepository, string $id): JsonResponse
     {
-        $todo = Todo::find($id);
-        $todo->delete();
+        $todo = $todoRepository->findById(Id::fromPrimitives($id));
 
-        return redirect('/')->with('success', 'Todo deleted successfuly!');
+        $todoRepository->delete($todo);
+
+        return response()->json([], JsonResponse::HTTP_NO_CONTENT);
     }
 }

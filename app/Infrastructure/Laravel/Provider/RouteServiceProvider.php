@@ -40,7 +40,6 @@ class RouteServiceProvider extends ServiceProvider
             //     ->group(base_path('routes/web.php'));
 
             Route::middleware('web')
-            // ->namespace('App\TodoInterface\Controller')
             ->namespace('App\TodoInterface\Controller')
             ->group(base_path('routes/web.php'));
         });
