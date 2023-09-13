@@ -25,14 +25,27 @@ class TodoController extends Controller
 
     public function __invoke(Request $request, TodoRepository $todoRepository)
     {
-        // dd($todoRepository);
-        // $todos = Todo::orderBy('created_at', 'desc')->get();
-   
-        // return view('index')->with('todos', $todos);
+        $todos = $todoRepository->all();
 
-        return view('welcome');
+        return view('index')->with('todos', $todos);
     }
 
+    public function show($id, TodoRepository $todoRepository)
+    {
+        $todoData = $todoRepository->findById(Id::fromPrimitives($id));
+        $todo = $todoData->asArray();
+        
+        return view('show')->with('todo', $todo);
+    }
+
+      // public function show(TodoRepository $todoRepository, string $id): JsonResponse
+    // {
+    //     $todo = $todoRepository->findById(Id::fromPrimitives($id));
+
+    //     return response()->json([
+    //         'todo' => $todo->asArray()
+    //     ]);
+    // }
 
     // public function __invoke(Request $request, TodoRepository $todoRepository): JsonResponse
     // {
@@ -77,14 +90,7 @@ class TodoController extends Controller
         ], JsonResponse::HTTP_CREATED);
     }
 
-    public function show(TodoRepository $todoRepository, string $id): JsonResponse
-    {
-        $todo = $todoRepository->findById(Id::fromPrimitives($id));
-
-        return response()->json([
-            'todo' => $todo->asArray()
-        ]);
-    }
+  
 
     public function update(Request $request, TodoRepository $todoRepository, string $id): JsonResponse
     {

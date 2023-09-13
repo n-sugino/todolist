@@ -1,8 +1,10 @@
 <?php namespace App\Infrastructure\Todo;
 
 use App\Domain\Shared\ValueObject\DateTimeValueObject;
-use App\Domain\Todo\ValueObject\Email;
 use App\Domain\Todo\ValueObject\Id;
+use App\Domain\Todo\ValueObject\Title;
+use App\Domain\Todo\ValueObject\Content;
+use App\Domain\Todo\ValueObject\Due;
 use App\Domain\Todo\Aggregate\Todo;
 use App\Domain\Todo\UserSearchCriteria;
 use App\Domain\Todo\Exception\UserNotFoundException;
@@ -38,8 +40,6 @@ class TodoRepository implements TodoRepositoryInterface
         $todoModel->save();
     }
 
-   
-    
     /**
      * @throws UserNotFoundException
      */
@@ -50,7 +50,7 @@ class TodoRepository implements TodoRepositoryInterface
         if (empty($todoModel)) {
             throw new UserNotFoundException('User does not exist');
         }
-
+       
         return self::map($todoModel);
     }
 
@@ -106,5 +106,10 @@ class TodoRepository implements TodoRepositoryInterface
             DateTimeValueObject::fromPrimitives($model->created_at),
             !empty($model->updated_at) ? DateTimeValueObject::fromPrimitives($model->updated_at) : null,
         );
+    }
+
+    public function all() 
+    {
+        return TodoModel::all();
     }
 }

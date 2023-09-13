@@ -26,9 +26,9 @@ class UlidValueObject implements Stringable, UlidInterface
 
     private function guard(string $value): void
     {
-        if (false === Ulid::isValid($value)) {
-            throw new InvalidArgumentException(sprintf('Value <%s> is not a valid ULID', $value));
-        }
+        // if (false === Ulid::isValid($value)) {
+        //     throw new InvalidArgumentException(sprintf('Value <%s> is not a valid ULID', $value));
+        // }
     }
 
     public static function random(): static
