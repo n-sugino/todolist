@@ -1,6 +1,9 @@
 <?php
 
-namespace App\Providers;
+namespace App\Infrastructure\Laravel\Provider;
+
+use App\Domain;
+use App\Infrastructure;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -13,7 +16,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+          // Repositories
+          $this->app->bind(Domain\Todo\TodoRepository::class, Infrastructure\Todo\TodoRepository::class);
     }
 
     /**

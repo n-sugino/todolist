@@ -22,26 +22,38 @@ use Illuminate\Http\JsonResponse;
 
 class TodoController extends Controller
 {
-    public function index(Request $request, TodoRepository $todoRepository): JsonResponse
+
+    public function __invoke(Request $request, TodoRepository $todoRepository)
     {
-        $offset = $request->query('offset');
-        $email = $request->query('email');
-        $name = $request->query('name');
+        // dd($todoRepository);
+        // $todos = Todo::orderBy('created_at', 'desc')->get();
+   
+        // return view('index')->with('todos', $todos);
 
-        $criteria = TodoSearchCriteria::create(
-            !empty($offset) && !is_array($offset) ? (int) $offset : null,
-            !empty($email) && !is_array($email) ? $email : null,
-            !empty($name) && !is_array($name) ? $name : null,
-        );
-
-        $criteria->sortBy(new CriteriaSort(CriteriaField::fromString('name'), CriteriaSortDirection::ASC));
-
-        $todos = $todoRepository->searchByCriteria($criteria);
-        
-        return response()->json([
-            'todos' => array_map(fn (Todo $todo) => $todo->asArray(), $todos)
-        ]);
+        return view('welcome');
     }
+
+
+    // public function __invoke(Request $request, TodoRepository $todoRepository): JsonResponse
+    // {
+    //     $offset = $request->query('offset');
+    //     $email = $request->query('email');
+    //     $name = $request->query('name');
+
+    //     $criteria = TodoSearchCriteria::create(
+    //         !empty($offset) && !is_array($offset) ? (int) $offset : null,
+    //         !empty($email) && !is_array($email) ? $email : null,
+    //         !empty($name) && !is_array($name) ? $name : null,
+    //     );
+
+    //     $criteria->sortBy(new CriteriaSort(CriteriaField::fromString('name'), CriteriaSortDirection::ASC));
+
+    //     $todos = $todoRepository->searchByCriteria($criteria);
+
+    //     return response()->json([
+    //         'todos' => array_map(fn (Todo $todo) => $todo->asArray(), $todos)
+    //     ]);
+    // }
 
     public function store(TodoRepository $todoRepository): JsonResponse
     {

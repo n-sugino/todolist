@@ -1,8 +1,14 @@
 <?php
 
-namespace App\Exceptions;
+namespace App\Infrastructure\Laravel\Exception;
 
+use App\Domain\Shared\Exception\DomainException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Http\Request;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class Handler extends ExceptionHandler

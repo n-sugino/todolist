@@ -14,9 +14,9 @@ interface TodoRepository
        /**
      * @throws UserNotFoundException
      */
-    public function findById(Id $userId): User;
+    public function findById(Id $userId): Todo;
 
-    public function searchById(Id $userId): ?User;
+    public function searchById(Id $userId): ?Todo;
 
     public function searchByCriteria(UserSearchCriteria $criteria): array;
     

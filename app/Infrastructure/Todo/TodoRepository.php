@@ -43,9 +43,9 @@ class TodoRepository implements TodoRepositoryInterface
     /**
      * @throws UserNotFoundException
      */
-    public function findById(Id $userId): User
+    public function findById(Id $userId): Todo
     {
-        $todoModel = UserModel::find($userId->value());
+        $todoModel = TodoModel::find($userId->value());
 
         if (empty($todoModel)) {
             throw new UserNotFoundException('User does not exist');
@@ -54,16 +54,16 @@ class TodoRepository implements TodoRepositoryInterface
         return self::map($todoModel);
     }
 
-    public function searchById(Id $userId): ?User
+    public function searchById(Id $userId): ?Todo
     {
-        $todoModel = UserModel::find($userId->value());
+        $todoModel = TodoModel::find($userId->value());
 
         return ($todoModel !== null) ? self::map($todoModel) : null;
     }
 
     public function searchByCriteria(UserSearchCriteria $criteria): array
     {
-        $todoModel = new UserModel();
+        $todoModel = new TodoModel();
 
         if (!empty($criteria->email())) {
             $todoModel = $todoModel->where('email', 'LIKE', '%' . $criteria->email() . '%');
@@ -83,7 +83,7 @@ class TodoRepository implements TodoRepositoryInterface
         }
 
         return array_map(
-            static fn (UserModel $user) => self::map($user),
+            static fn (TodoModel $user) => self::map($user),
             $todoModel->get()->all()
         );
     }
