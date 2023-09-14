@@ -12,13 +12,9 @@ interface TodoRepository
     public function update(Todo $todo): void;
 
        /**
-     * @throws UserNotFoundException
+     * @throws TodoNotFoundException
      */
-    public function findById(Id $userId): Todo;
+    public function findById(Id $id): Todo;
 
-    public function searchById(Id $userId): ?Todo;
-
-    public function searchByCriteria(UserSearchCriteria $criteria): array;
-    
     public function delete(Todo $todo): void;
 }

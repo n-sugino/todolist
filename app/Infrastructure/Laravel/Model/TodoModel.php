@@ -2,10 +2,10 @@
 
 namespace App\Infrastructure\Laravel\Model;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-class TodoModel extends Authenticatable
+class TodoModel extends Model
 {
     use HasUuids;
 
@@ -13,11 +13,6 @@ class TodoModel extends Authenticatable
         'title',
         'content',
         'due',
-    ];
-
-    protected $hidden = [
-        'password',
-        'remember_token',
     ];
 
     protected $table = 'todos';

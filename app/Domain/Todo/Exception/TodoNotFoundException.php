@@ -6,6 +6,7 @@ namespace App\Domain\Todo\Exception;
 
 use App\Domain\Shared\Exception\NotFoundException;
 
-class UserNotFoundException extends NotFoundException
+class TodoNotFoundException extends NotFoundException
 {
+    
 }

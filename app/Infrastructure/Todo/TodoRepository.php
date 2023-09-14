@@ -6,10 +6,8 @@ use App\Domain\Todo\ValueObject\Title;
 use App\Domain\Todo\ValueObject\Content;
 use App\Domain\Todo\ValueObject\Due;
 use App\Domain\Todo\Aggregate\Todo;
-use App\Domain\Todo\UserSearchCriteria;
-use App\Domain\Todo\Exception\UserNotFoundException;
+use App\Domain\Todo\Exception\TodoNotFoundException;
 use App\Domain\Todo\TodoRepository as TodoRepositoryInterface;
-
 use App\Domain\Todo\ValueObject\Name;
 use App\Infrastructure\Laravel\Model\TodoModel;
 
@@ -41,53 +39,19 @@ class TodoRepository implements TodoRepositoryInterface
     }
 
     /**
-     * @throws UserNotFoundException
+     * @throws TodoNotFoundException
      */
     public function findById(Id $userId): Todo
     {
         $todoModel = TodoModel::find($userId->value());
 
         if (empty($todoModel)) {
-            throw new UserNotFoundException('User does not exist');
+            throw new TodoNotFoundException('Todo does not exist');
+         
         }
        
         return self::map($todoModel);
     }
-
-    public function searchById(Id $userId): ?Todo
-    {
-        $todoModel = TodoModel::find($userId->value());
-
-        return ($todoModel !== null) ? self::map($todoModel) : null;
-    }
-
-    public function searchByCriteria(UserSearchCriteria $criteria): array
-    {
-        $todoModel = new TodoModel();
-
-        if (!empty($criteria->email())) {
-            $todoModel = $todoModel->where('email', 'LIKE', '%' . $criteria->email() . '%');
-        }
-
-        if (!empty($criteria->name())) {
-            $todoModel = $todoModel->where('name', 'LIKE', '%' . $criteria->name() . '%');
-        }
-
-        if ($criteria->pagination() !== null) {
-            $todoModel = $todoModel->take($criteria->pagination()->limit()->value())
-                                   ->skip($criteria->pagination()->offset()->value());
-        }
-
-        if ($criteria->sort() !== null) {
-            $todoModel = $todoModel->orderBy($criteria->sort()->field()->value(), $criteria->sort()->direction()->value());
-        }
-
-        return array_map(
-            static fn (TodoModel $user) => self::map($user),
-            $todoModel->get()->all()
-        );
-    }
-    
 
     public function delete(Todo $todo): void
     {
@@ -110,6 +74,6 @@ class TodoRepository implements TodoRepositoryInterface
 
     public function all() 
     {
-        return TodoModel::all();
+        return TodoModel::orderBy('created_at', 'desc')->get();;
     }
 }
